@@ -25,7 +25,7 @@ public class Brick {
     }
 
     public boolean isVisible() { return visible; }
-    public void setVisible(boolean visible) { visible = visible; }
+    public void setVisible(boolean visible) { this.visible = visible; }
 
     public boolean collidesWith(Ball ball) {
         if (!visible) return false;
