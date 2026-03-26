@@ -6,6 +6,7 @@ public class Arrow {
 
     public void paint(Graphics g) {
         Game game = Game.getInstance();
+        if (game.getBall().isMoving()) return;
         Paddle paddle = game.getPaddle();
         int startX = paddle.getX() + 50;
         int startY = paddle.getY() - 10;

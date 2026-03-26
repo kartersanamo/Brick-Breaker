@@ -5,19 +5,19 @@ import java.awt.*;
 
 public class Game {
     private static Game instance;
-    private final int bricksPerRow = 10;
-    private final int initialBrickRows = 3;
+    private final int brickCols = 10;
+    private int brickRows = 3;
     private final int arrowLength = 75;
 
     private Player player;
     private Paddle paddle;
     private Ball ball;
     private Arrow arrow;
-    private Brick[] bricks;
+    private Brick[][] bricks;
     private JFrame frame;
     private GamePanel panel;
     private GameState gameState;
-    private int round;
+    private int round = 1;
 
     private int mouseX = 400;
     private int mouseY = 300;
@@ -33,19 +33,16 @@ public class Game {
         paddle = new Paddle();
         ball = new Ball();
         arrow = new Arrow();
-        bricks = new Brick[bricksPerRow * initialBrickRows];
+        bricks = new  Brick[brickCols][brickCols];
 
-        int brickWidth = 60;
+        int brickWidth = (width / brickCols) - 6;
         int brickHeight = 20;
-        for (int i = 0; i < initialBrickRows; i++) {
-            for (int j = 0; j < bricksPerRow; j++) {
-                int x = 10 + j * (brickWidth + 5);
-                int y = 50 + i * (brickHeight + 5);
-                Brick brick = new Brick(x, y, brickWidth, brickHeight);
-                bricks[i * bricksPerRow + j] = brick;
+        for (int row = 0; row < brickRows; row++) {
+            for (int col = 0; col < brickCols; col++) {
+                Brick brick = new Brick(brickWidth, brickHeight);
+                bricks[row][col] = brick;
             }
         }
-        round = 0;
         gameState = GameState.NOT_STARTED;
         frame = new JFrame("Brick Breaker");
         buildFrame();
@@ -67,6 +64,8 @@ public class Game {
         gameTimer = new Timer(1000 / 60, e -> {
             if (gameState == GameState.PLAYING) {
                 ball.update();
+                if (panel.isMovingLeft()) paddle.moveLeft();
+                if (panel.isMovingRight()) paddle.moveRight();
             }
             panel.repaint();
         });
@@ -117,7 +116,7 @@ public class Game {
 
     public GameState getGameState() { return gameState; }
 
-    public Brick[] getBricks() { return bricks; }
+    public Brick[][] getBricks() { return bricks; }
 
     public void startGame() {
         // Called when splash is dismissed
@@ -137,5 +136,33 @@ public class Game {
 
     public GamePanel getPanel() {
         return panel;
+    }
+
+    public int getRound() {
+        return round;
+    }
+
+    public void incRound() {
+        round++;
+    }
+
+    public void newRound() {
+        int brickCols = this.brickCols;
+        int brickRows = bricks.length + 1;
+        int brickWidth = (width / brickCols) - 6;
+        int brickHeight = 20;
+        Brick[][] newBricks = new Brick[brickRows][brickCols];
+        // Shift existing rows down
+        for (int row = 0; row < bricks.length; row++) {
+            for (int col = 0; col < brickCols; col++) {
+                newBricks[row + 1][col] = bricks[row][col];
+            }
+        }
+        // Add new row at the top
+        for (int col = 0; col < brickCols; col++) {
+            newBricks[0][col] = new Brick(brickWidth, brickHeight);
+        }
+        bricks = newBricks;
+        incRound();
     }
 }

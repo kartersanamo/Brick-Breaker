@@ -3,20 +3,16 @@ package com.kartersanamo.brickBreaker;
 import java.awt.*;
 
 public class Brick {
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
     private boolean visible = true;
 
-    public Brick(int x, int y, int width, int height) {
-        this.x = x;
-        this.y = y;
+    public Brick(int width, int height) {
         this.width = width;
         this.height = height;
     }
 
-    public void paint(Graphics g) {
+    public void paint(Graphics g, int x, int y) {
         if (!visible) return;
         g.setColor(Color.ORANGE);
         g.fillRect(x, y, width, height);
@@ -27,7 +23,7 @@ public class Brick {
     public boolean isVisible() { return visible; }
     public void setVisible(boolean visible) { this.visible = visible; }
 
-    public boolean collidesWith(Ball ball) {
+    public boolean collidesWith(Ball ball, int x, int y) {
         if (!visible) return false;
         return ball.getX() + ball.getWidth() > x &&
                 ball.getX() < x + width &&

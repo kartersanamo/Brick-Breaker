@@ -26,13 +26,18 @@ public class Ball {
 
     public void shoot(MouseEvent event) {
         if (moving) { return; }
+        // Get arrow base (same as Arrow.java)
+        Paddle paddle = Game.getInstance().getPaddle();
+        int baseX = paddle.getX() + 50;
+        int baseY = paddle.getY() - 10;
+        // Place ball at arrow base
+        x = baseX - width / 2;
+        y = baseY - height / 2;
         moving = true;
         int cursorX = event.getX();
         int cursorY = event.getY();
-        int centerX = x + width / 2;
-        int centerY = y + height / 2;
-        int dx = cursorX - centerX;
-        int dy = cursorY - centerY;
+        int dx = cursorX - baseX;
+        int dy = cursorY - baseY;
         double angle = Math.atan2(dy, dx);
         vx = speed * Math.cos(angle);
         vy = speed * Math.sin(angle);
@@ -55,18 +60,29 @@ public class Ball {
             y = 0;
         }
         // the bottom, reset
-        if (y + vy + height > Game.getInstance().getHeight()) {
+        if (y + height > Game.getInstance().getHeight()) {
             vx = 0;
             vy = 0;
-            x = Game.getInstance().getWidth() / 2 - width / 2;
-            y = Game.getInstance().getHeight() - Game.getInstance().getPaddle().getHeight() - height;
+            x = Game.getInstance().getPaddle().getX() + (Game.getInstance().getPaddle().getWidth() / 2) - (width / 2);
+            y = Game.getInstance().getPaddle().getY() - height;
+            Game.getInstance().newRound();
             moving = false;
         }
 
-        for (Brick brick: Game.getInstance().getBricks()) {
-            if (brick.collidesWith(this)) {
-                vy = -vy;
-                brick.setVisible(false);
+        for (int row = 0; row < Game.getInstance().getBricks().length; row++) {
+            for (int col = 0; col < Game.getInstance().getBricks()[row].length; col++) {
+                Brick brick = Game.getInstance().getBricks()[row][col];
+                if (brick != null && brick.isVisible()) {
+                    int brickWidth = (Game.getInstance().getWidth() / Game.getInstance().getBricks()[row].length) - 6;
+                    int brickHeight = 20;
+                    int x = 10 + col * (brickWidth + 5);
+                    int y = 50 + row * (brickHeight + 5);
+                    if (brick.collidesWith(this, x, y)) {
+                        vy = -vy;
+                        brick.setVisible(false);
+                        Game.getInstance().getPlayer().incScore();
+                    }
+                }
             }
         }
 
@@ -83,6 +99,11 @@ public class Ball {
         return x;
     }
 
+    public void incX(int inc) {
+        if (moving) { return; }
+        x += inc;
+    }
+
     public int getY() {
         return y;
     }
@@ -93,5 +114,9 @@ public class Ball {
 
     public int getHeight() {
         return height;
+    }
+
+    public boolean isMoving() {
+        return moving;
     }
 }

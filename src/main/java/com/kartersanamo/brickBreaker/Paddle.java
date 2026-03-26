@@ -3,8 +3,9 @@ package com.kartersanamo.brickBreaker;
 import java.awt.*;
 
 public class Paddle {
-    private final int x;
-    private final int y;
+    private int x;
+    private final int speed = 5;
+    private int y;
     private final int height = 10;
     private final int width = 100;
 
@@ -38,5 +39,17 @@ public class Paddle {
                 ball.getX() < x + width &&
                 ball.getY() + ball.getHeight() > y &&
                 ball.getY() < y + height;
+    }
+
+    public void moveLeft() {
+        if (x < 0) return;
+        Game.getInstance().getBall().incX(-speed);
+        x -= speed;
+    }
+
+    public void moveRight() {
+        if (x + width > Game.getInstance().getWidth()) return;
+        Game.getInstance().getBall().incX(speed);
+        x += speed;
     }
 }

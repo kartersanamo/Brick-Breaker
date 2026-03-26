@@ -2,15 +2,17 @@ package com.kartersanamo.brickBreaker;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
+import java.awt.event.*;
 
 public class GamePanel extends JPanel {
     private final Game game;
+    private boolean movingLeft = false;
+    private boolean movingRight = false;
 
     public GamePanel(Game game) {
         this.game = game;
+        setFocusable(true);
+        requestFocusInWindow();
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -29,6 +31,18 @@ public class GamePanel extends JPanel {
                 repaint();
             }
         });
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_LEFT) movingLeft = true;
+                if (e.getKeyCode() == KeyEvent.VK_RIGHT) movingRight = true;
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_LEFT) movingLeft = false;
+                if (e.getKeyCode() == KeyEvent.VK_RIGHT) movingRight = false;
+            }
+        });
     }
 
     @Override
@@ -44,14 +58,26 @@ public class GamePanel extends JPanel {
 
         // Draw game elements if not in splash
         if (game.getGameState() != GameState.NOT_STARTED) {
-            for (Brick brick : game.getBricks()) {
-                if (brick != null) brick.paint(g);
+            int brickCols = game.getBricks()[0].length;
+            int brickRows = game.getBricks().length;
+            int brickWidth = (game.getWidth() / brickCols) - 6;
+            int brickHeight = 20;
+            for (int row = 0; row < brickRows; row++) {
+                for (int col = 0; col < brickCols; col++) {
+                    Brick brick = game.getBricks()[row][col];
+                    if (brick != null && brick.isVisible()) {
+                        int x = 10 + col * (brickWidth + 5);
+                        int y = 50 + row * (brickHeight + 5);
+                        brick.paint(g, x, y);
+                    }
+                }
             }
             paddle.paint(g);
             ball.paint(g);
             arrow.paint(g);
             g.setColor(Color.WHITE);
             g.drawString("Score: " + player.getScore(), 10, 20);
+            g.drawString("Round: " + Game.getInstance().getRound(), Game.getInstance().getWidth() - 80, 20);
         } else {
             // Draw splash overlay
             Graphics2D g2 = (Graphics2D) g.create();
@@ -69,5 +95,13 @@ public class GamePanel extends JPanel {
             g2.drawString(line2, x2, y + fm.getHeight() + 20);
             g2.dispose();
         }
+    }
+
+    public boolean isMovingLeft() {
+        return movingLeft;
+    }
+
+    public boolean isMovingRight() {
+        return movingRight;
     }
 }
